@@ -1,0 +1,27 @@
+smartwash/
+├── .gitignore
+├── requirements.txt
+├── README.md
+├── ai/
+│   ├── README.md
+│   ├── demand_prediction/
+│   │   └── demand_model.py
+│   └── anomaly_detection/
+│       └── anomaly_detection.py
+├── app/
+│   └── README.md
+├── backend/
+│   ├── README.md
+│   ├── api/
+│   │   └── app.py
+│   └── database/
+│       └── schema.md
+├── hardware/
+│   ├── README.md
+│   ├── components/
+│   │   └── bom.md
+│   └── firmware/
+│       └── main.ino
+└── docs/
+    └── architecture/
+        └── system_overview.md
