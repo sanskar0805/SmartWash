@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.env
+venv/
+.venv/
+
+# Flutter
+app/.dart_tool/
+app/build/
+app/.flutter-plugins
+app/.flutter-plugins-dependencies
+app/pubspec.lock
+
+# Firebase
+**/google-services.json
+**/GoogleService-Info.plist
+**/serviceAccountKey.json
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Data (raw sensor logs — not committed to repo)
+ai/datasets/*.csv
+ai/datasets/*.json

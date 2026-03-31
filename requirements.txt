@@ -1,0 +1,17 @@
+# SmartWash — Python Dependencies
+# Install with: pip install -r requirements.txt
+
+# Backend
+flask>=3.0.0
+firebase-admin>=6.0.0
+
+# AI — Demand Prediction
+prophet>=1.1.0
+pandas>=2.0.0
+numpy>=1.26.0
+
+# AI — Anomaly Detection
+scikit-learn>=1.4.0
+
+# Utilities
+python-dotenv>=1.0.0
