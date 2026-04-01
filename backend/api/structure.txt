@@ -1,0 +1,12 @@
+backend/api/app.py
+
+Flask App
+    Routes
+        /machines
+        /status
+        /book
+        /predict
+        /anomaly
+        /iot/update
+Database connection
+AI model integration
