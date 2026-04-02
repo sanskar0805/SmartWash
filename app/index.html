@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SmartWash</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --wash-bg: #F4F2EE;
+    --wash-card: #FFFFFF;
+    --wash-border: rgba(0,0,0,0.10);
+    --wash-text: #1A1A1A;
+    --wash-muted: #7A7A7A;
+    --wash-accent: #1D9E75;
+    --wash-blue: #378ADD;
+    --wash-amber: #BA7517;
+    --wash-red: #A32D2D;
+    --wash-green: #3B6D11;
+    --r: 14px;
+    --r-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--wash-bg);
+    color: var(--wash-text);
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--wash-card);
+    border-bottom: 1px solid var(--wash-border);
+    padding: 0 1.25rem;
+    position: sticky; top: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    height: 56px;
+  }
+  .logo { font-family: 'Space Mono', monospace; font-size: 1.1rem; font-weight: 700; letter-spacing: -0.03em; }
+  .logo span { color: var(--wash-accent); }
+  .header-right { display: flex; align-items: center; gap: 12px; }
+  .notif-btn {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #F4F2EE; border: 1px solid var(--wash-border);
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 16px; position: relative;
+  }
+  .notif-dot {
+    position: absolute; top: 6px; right: 6px;
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--wash-red); border: 1.5px solid white;
+  }
+  .avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    background: #E1F5EE; border: 1px solid #5DCAA5;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 600; color: #0F6E56;
+  }
+
+  /* ── Main ── */
+  .main { max-width: 480px; margin: 0 auto; padding: 1.25rem; }
+
+  /* ── Section heading ── */
+  .section-head {
+    display: flex; align-items: baseline; justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .section-head h2 { font-size: 0.85rem; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--wash-muted); }
+  .section-head a { font-size: 0.8rem; color: var(--wash-accent); cursor: pointer; }
+
+  /* ── AI Banner ── */
+  .ai-banner {
+    background: linear-gradient(135deg, #E1F5EE 0%, #e8f5fe 100%);
+    border: 1px solid #9FE1CB;
+    border-radius: var(--r);
+    padding: 1rem 1.125rem;
+    margin-bottom: 1.25rem;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .ai-icon { font-size: 20px; flex-shrink: 0; margin-top: 2px; }
+  .ai-label { font-size: 0.7rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #0F6E56; margin-bottom: 3px; }
+  .ai-text { font-size: 0.875rem; color: #085041; line-height: 1.5; }
+  .ai-pill {
+    display: inline-block; margin-top: 8px;
+    background: #0F6E56; color: white;
+    font-size: 0.75rem; font-weight: 500;
+    padding: 4px 12px; border-radius: 999px;
+    cursor: pointer;
+  }
+
+  /* ── Machine Grid ── */
+  .machine-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 1.5rem;
+  }
+
+  .machine-card {
+    background: var(--wash-card);
+    border: 1px solid var(--wash-border);
+    border-radius: var(--r);
+    padding: 1rem;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .machine-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,0,0,0.08); }
+  .machine-card.fault { border-color: #F7C1C1; background: #FCEBEB; }
+  .machine-card.selected { border-color: var(--wash-accent); box-shadow: 0 0 0 2px rgba(29,158,117,0.2); }
+
+  .machine-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
+  .machine-id { font-family: 'Space Mono', monospace; font-size: 0.75rem; font-weight: 700; color: var(--wash-muted); }
+  .state-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    flex-shrink: 0; margin-top: 3px;
+  }
+  .dot-available { background: #63C132; box-shadow: 0 0 0 3px rgba(99,193,50,0.25); }
+  .dot-running   { background: var(--wash-blue); box-shadow: 0 0 0 3px rgba(55,138,221,0.25); animation: pulse 1.5s infinite; }
+  .dot-done      { background: #EF9F27; box-shadow: 0 0 0 3px rgba(239,159,39,0.25); }
+  .dot-fault     { background: #E24B4A; box-shadow: 0 0 0 3px rgba(226,75,74,0.25); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .machine-icon { font-size: 28px; margin-bottom: 8px; display: block; }
+  .machine-state-label { font-size: 0.8rem; font-weight: 600; color: var(--wash-text); }
+  .machine-sub { font-size: 0.72rem; color: var(--wash-muted); margin-top: 2px; }
+  .machine-bar {
+    height: 3px; border-radius: 99px;
+    background: #E8E6E1; margin-top: 10px; overflow: hidden;
+  }
+  .machine-bar-fill { height: 100%; border-radius: 99px; transition: width 1s linear; }
+  .bar-blue  { background: var(--wash-blue); }
+  .bar-green { background: #63C132; }
+  .bar-amber { background: #EF9F27; }
+
+  /* ── Detail Panel ── */
+  .detail-panel {
+    background: var(--wash-card);
+    border: 1px solid var(--wash-border);
+    border-radius: var(--r);
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+    display: none;
+  }
+  .detail-panel.open { display: block; }
+  .detail-header {
+    padding: 1rem 1.125rem;
+    border-bottom: 1px solid var(--wash-border);
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .detail-title { font-size: 1rem; font-weight: 600; }
+  .detail-close { cursor: pointer; color: var(--wash-muted); font-size: 18px; line-height: 1; }
+
+  .detail-body { padding: 1rem 1.125rem; }
+  .detail-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--wash-border); }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { font-size: 0.8rem; color: var(--wash-muted); }
+  .detail-val { font-size: 0.875rem; font-weight: 500; }
+
+  .book-btn {
+    width: 100%; padding: 12px;
+    background: var(--wash-accent); color: white;
+    border: none; border-radius: var(--r-sm);
+    font-size: 0.9rem; font-weight: 600;
+    cursor: pointer; margin-top: 1rem;
+    transition: opacity 0.15s;
+  }
+  .book-btn:hover { opacity: 0.9; }
+  .book-btn:disabled { background: #B4B2A9; cursor: not-allowed; }
+
+  /* ── Queue ── */
+  .queue-list { margin-top: 0.75rem; }
+  .queue-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 0; border-bottom: 1px solid var(--wash-border);
+    font-size: 0.8rem;
+  }
+  .queue-item:last-child { border: none; }
+  .queue-num {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: #E1F5EE; color: #0F6E56;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.75rem; font-weight: 600; flex-shrink: 0;
+  }
+  .queue-name { flex: 1; font-weight: 500; }
+  .queue-time { color: var(--wash-muted); }
+
+  /* ── Report ── */
+  .report-btn {
+    width: 100%; padding: 10px;
+    background: transparent; color: var(--wash-red);
+    border: 1px solid #F7C1C1; border-radius: var(--r-sm);
+    font-size: 0.8rem; font-weight: 500;
+    cursor: pointer; margin-top: 8px;
+    transition: background 0.15s;
+  }
+  .report-btn:hover { background: #FCEBEB; }
+
+  /* ── Booking Toast ── */
+  .toast {
+    position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
+    background: #1A1A1A; color: white;
+    padding: 10px 20px; border-radius: 999px;
+    font-size: 0.85rem; font-weight: 500;
+    opacity: 0; transition: opacity 0.3s; pointer-events: none;
+    white-space: nowrap; z-index: 200;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ── Bottom Nav ── */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 0; right: 0;
+    background: var(--wash-card); border-top: 1px solid var(--wash-border);
+    display: flex; height: 64px;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 3px;
+    font-size: 0.65rem; color: var(--wash-muted); cursor: pointer;
+    transition: color 0.15s;
+  }
+  .nav-item.active { color: var(--wash-accent); }
+  .nav-icon { font-size: 20px; }
+
+  /* ── Fault badge ── */
+  .fault-badge {
+    display: inline-block; background: #FCEBEB; color: #A32D2D;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 99px;
+    border: 1px solid #F7C1C1;
+  }
+  .done-badge {
+    display: inline-block; background: #FAEEDA; color: #633806;
+    font-size: 0.65rem; font-weight: 600; letter-spacing: 0.04em;
+    text-transform: uppercase; padding: 2px 8px; border-radius: 99px;
+    border: 1px solid #FAC775;
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ Header ══ -->
+<header class="header">
+  <div class="logo">Smart<span>Wash</span></div>
+  <div class="header-right">
+    <div class="notif-btn">🔔<span class="notif-dot"></span></div>
+    <div class="avatar">RS</div>
+  </div>
+</header>
+
+<!-- ══ Main ══ -->
+<div class="main">
+
+  <!-- AI Banner -->
+  <div class="ai-banner">
+    <div class="ai-icon">✨</div>
+    <div>
+      <div class="ai-label">AI Suggestion</div>
+      <div class="ai-text">Laundry is usually quiet between <strong>10 AM – 12 PM</strong> today. Good time to avoid queues.</div>
+      <div class="ai-pill" onclick="showToast('Opening schedule view...')">Book a slot ↗</div>
+    </div>
+  </div>
+
+  <!-- Machine Grid -->
+  <div class="section-head">
+    <h2>Machines</h2>
+    <a>View map</a>
+  </div>
+
+  <div class="machine-grid" id="machine-grid"></div>
+
+  <!-- Detail Panel (shown on machine click) -->
+  <div class="detail-panel" id="detail-panel">
+    <div class="detail-header">
+      <div class="detail-title" id="detail-title">Machine M1</div>
+      <div class="detail-close" onclick="closeDetail()">✕</div>
+    </div>
+    <div class="detail-body" id="detail-body"></div>
+  </div>
+
+  <!-- Queue Section -->
+  <div class="section-head">
+    <h2>Queue</h2>
+    <a>Join queue</a>
+  </div>
+  <div style="background:var(--wash-card);border:1px solid var(--wash-border);border-radius:var(--r);padding:1rem 1.125rem;margin-bottom:1.5rem;">
+    <div class="queue-list">
+      <div class="queue-item">
+        <div class="queue-num">1</div>
+        <div class="queue-name">Rohan S. <span style="color:var(--wash-accent);font-size:0.7rem;">● You</span></div>
+        <div class="queue-time">M2 · Now</div>
+      </div>
+      <div class="queue-item">
+        <div class="queue-num">2</div>
+        <div class="queue-name">Priya M.</div>
+        <div class="queue-time">M2 · ~45 min</div>
+      </div>
+      <div class="queue-item">
+        <div class="queue-num">3</div>
+        <div class="queue-name">Aditya K.</div>
+        <div class="queue-time">M1 · ~90 min</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══ Toast ══ -->
+<div class="toast" id="toast"></div>
+
+<!-- ══ Bottom Nav ══ -->
+<nav class="bottom-nav">
+  <div class="nav-item active">
+    <span class="nav-icon">🏠</span>
+    <span>Home</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">📅</span>
+    <span>Book</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">🔔</span>
+    <span>Alerts</span>
+  </div>
+  <div class="nav-item">
+    <span class="nav-icon">👤</span>
+    <span>Profile</span>
+  </div>
+</nav>
+
+<script>
+const machines = [
+  { id: "M1", state: "running",   user: "Rohan S.", progress: 62, eta: "23 min left" },
+  { id: "M2", state: "available", user: null,        progress: 0,  eta: "Ready" },
+  { id: "M3", state: "done",      user: "Priya M.",  progress: 100, eta: "Collect now" },
+  { id: "M4", state: "fault",     user: null,        progress: 0,  eta: "Out of service" },
+  { id: "M5", state: "running",   user: "Akash T.",  progress: 38, eta: "40 min left" },
+  { id: "M6", state: "available", user: null,        progress: 0,  eta: "Ready" },
+];
+
+const stateConfig = {
+  available: { label: "Available",    dot: "dot-available", icon: "🫧", bar: "bar-green", sub: "Ready to use" },
+  running:   { label: "Running",      dot: "dot-running",   icon: "🌀", bar: "bar-blue",  sub: "" },
+  done:      { label: "Done",         dot: "dot-done",      icon: "✅", bar: "bar-amber", sub: "" },
+  fault:     { label: "Fault",        dot: "dot-fault",     icon: "⚠️", bar: "",          sub: "Report needed" },
+};
+
+let selectedId = null;
+
+function renderGrid() {
+  const grid = document.getElementById("machine-grid");
+  grid.innerHTML = "";
+  machines.forEach(m => {
+    const cfg = stateConfig[m.state];
+    const card = document.createElement("div");
+    card.className = `machine-card ${m.state === "fault" ? "fault" : ""} ${selectedId === m.id ? "selected" : ""}`;
+    card.onclick = () => selectMachine(m.id);
+    card.innerHTML = `
+      <div class="machine-top">
+        <span class="machine-id">${m.id}</span>
+        <span class="state-dot ${cfg.dot}"></span>
+      </div>
+      <span class="machine-icon">${cfg.icon}</span>
+      <div class="machine-state-label">${cfg.label}</div>
+      <div class="machine-sub">${m.state === "running" ? m.eta : m.state === "done" ? "Collect now" : cfg.sub}</div>
+      <div class="machine-bar">
+        <div class="machine-bar-fill ${cfg.bar}" style="width:${m.progress}%"></div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function selectMachine(id) {
+  selectedId = (selectedId === id) ? null : id;
+  renderGrid();
+
+  const panel = document.getElementById("detail-panel");
+  if (!selectedId) { panel.classList.remove("open"); return; }
+
+  const m = machines.find(x => x.id === id);
+  const cfg = stateConfig[m.state];
+
+  document.getElementById("detail-title").textContent = `Machine ${m.id}`;
+
+  const body = document.getElementById("detail-body");
+  const badge = m.state === "fault"
+    ? `<span class="fault-badge">Fault</span>`
+    : m.state === "done"
+    ? `<span class="done-badge">Done — collect clothes</span>`
+    : cfg.label;
+
+  body.innerHTML = `
+    <div class="detail-row"><span class="detail-label">Status</span><span class="detail-val">${badge}</span></div>
+    <div class="detail-row"><span class="detail-label">Current user</span><span class="detail-val">${m.user || "—"}</span></div>
+    <div class="detail-row"><span class="detail-label">Time remaining</span><span class="detail-val">${m.eta}</span></div>
+    <div class="detail-row"><span class="detail-label">Cycle progress</span>
+      <span class="detail-val">
+        <span style="font-family:'Space Mono',monospace;font-size:0.85rem;">${m.progress}%</span>
+      </span>
+    </div>
+    ${m.state === "available"
+      ? `<button class="book-btn" onclick="bookMachine('${m.id}')">Book this machine</button>`
+      : m.state === "fault"
+      ? `<button class="report-btn" onclick="reportFault('${m.id}')">⚠ Report fault to admin</button>`
+      : `<button class="book-btn" disabled>Join queue</button>`
+    }
+  `;
+
+  panel.classList.add("open");
+  panel.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function closeDetail() {
+  selectedId = null;
+  renderGrid();
+  document.getElementById("detail-panel").classList.remove("open");
+}
+
+function bookMachine(id) {
+  showToast(`✅ Slot booked for ${id}! You'll be notified when it's free.`);
+  closeDetail();
+}
+
+function reportFault(id) {
+  showToast(`⚠ Fault reported for ${id}. Admin notified.`);
+  closeDetail();
+}
+
+function showToast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("show");
+  setTimeout(() => t.classList.remove("show"), 3000);
+}
+
+// Animate running progress bar
+function tick() {
+  machines.forEach(m => {
+    if (m.state === "running") {
+      m.progress = Math.min(100, m.progress + 0.1);
+    }
+  });
+  renderGrid();
+}
+
+renderGrid();
+setInterval(tick, 800);
+</script>
+</body>
+</html>
